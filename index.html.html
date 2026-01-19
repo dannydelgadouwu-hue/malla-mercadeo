@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Curricular Interactiva – Mercadeo</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; background:#fff7fb; margin:0; padding:20px; color:#5a2a4a; }
+    h1 { text-align:center; color:#d16ba5; }
+    h3 { color:#c777b9; }
+    .semestre, .panel { background:#ffffff; border-radius:18px; margin:16px auto; max-width:1000px; box-shadow:0 8px 18px rgba(209,107,165,.18); padding:18px; }
+    .materia { display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px dashed #f3c6dc; }
+    .materia:last-child { border-bottom:none; }
+    .materia label { cursor:pointer; }
+    .badge { background:#fde2f3; color:#8b3a62; padding:4px 12px; border-radius:14px; font-size:12px; }
+    .resumen { display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; }
+    .box { flex:1; min-width:280px; background:#fdeaf4; border-radius:16px; padding:16px; }
+  </style>
+</head>
+<body>
+
+<h1>🌸 Malla Curricular Interactiva – Mercadeo</h1>
+
+<div class="panel resumen">
+  <div class="box">
+    <h3>📊 Créditos aprobados</h3>
+    <p><strong><span id="creditos">0</span></strong> créditos acumulados</p>
+  </div>
+  <div class="box">
+    <h3>➡️ Materias que puedes ver ahora</h3>
+    <ul id="siguientes"></ul>
+  </div>
+</div>
+
+<div class="semestre">
+  <h3>📘 Plan de Estudios</h3>
+  <div id="materias"></div>
+</div>
+
+<div class="semestre">
+  <h3>🌷 Humanísticas y Competencias Básicas</h3>
+  <div id="humanisticas"></div>
+</div>
+
+<script>
+const materias = [
+ {nombre:'Fundamentos de Mercadeo', creditos:3, pre:[]},
+ {nombre:'Psicología del Consumidor', creditos:2, pre:[]},
+ {nombre:'Teoría de la Investigación', creditos:3, pre:[]},
+ {nombre:'Introducción a la Economía', creditos:3, pre:[]},
+ {nombre:'Cálculo Diferencial e Integral', creditos:3, pre:[]},
+ {nombre:'Comportamiento del Consumidor', creditos:2, pre:['Psicología del Consumidor']},
+ {nombre:'Metodología de la Investigación', creditos:3, pre:[]},
+ {nombre:'Microeconomía', creditos:3, pre:['Introducción a la Economía']},
+ {nombre:'Álgebra de Matrices y Programación Lineal', creditos:3, pre:[]},
+ {nombre:'Administración', creditos:2, pre:[]},
+ {nombre:'Gerencia del Producto', creditos:3, pre:[]},
+ {nombre:'Estadística I', creditos:3, pre:[]},
+ {nombre:'Estadística II', creditos:3, pre:['Estadística I']},
+ {nombre:'Mix de Comunicación', creditos:3, pre:['Fundamentos de Mercadeo']},
+ {nombre:'Sistema de Información de Mercados', creditos:3, pre:[]},
+ {nombre:'Investigación de Mercados Cualitativa', creditos:3, pre:['Sistema de Información de Mercados']},
+ {nombre:'Investigación de Mercados Cuantitativa', creditos:3, pre:['Investigación de Mercados Cualitativa']},
+ {nombre:'Mercadeo Estratégico', creditos:3, pre:[]},
+ {nombre:'Gerencia de Marca', creditos:3, pre:['Gerencia del Producto']},
+ {nombre:'Gerencia de Ventas', creditos:3, pre:['Mercadeo Estratégico']},
+ {nombre:'Plan Estratégico de Mercadeo', creditos:3, pre:['Gerencia de Marca','Gerencia de Ventas']}
+];
+
+const humanisticas = [
+ {nombre:'Formación Humanística – Humanismo', creditos:2},
+ {nombre:'Formación Humanística – Cultura artística y física', creditos:2},
+ {nombre:'Formación Humanística – Formación ciudadana', creditos:2},
+ {nombre:'Formación Humanística – Problemáticas de contexto', creditos:2},
+ {nombre:'Lectura y Producción de Textos I', creditos:1},
+ {nombre:'Lectura y Producción de Textos II', creditos:1},
+ {nombre:'Lenguaje y Herramientas Informáticas', creditos:2}
+];
+
+function guardar(){
+ localStorage.setItem('materias', JSON.stringify(materias.map(m=>document.getElementById(m.nombre).checked)));
+ localStorage.setItem('humanisticas', JSON.stringify(humanisticas.map((_,i)=>document.getElementById('h'+i).checked)));
+}
+
+function cargar(){
+ let m = JSON.parse(localStorage.getItem('materias')||'[]');
+ let h = JSON.parse(localStorage.getItem('humanisticas')||'[]');
+ materias.forEach((mat,i)=>{ if(m[i]) document.getElementById(mat.nombre).checked=true; });
+ humanisticas.forEach((_,i)=>{ if(h[i]) document.getElementById('h'+i).checked=true; });
+ render();
+}
+
+function render(){
+ let total=0;
+ materias.forEach(m=>{ if(document.getElementById(m.nombre).checked) total+=m.creditos; });
+ document.getElementById('creditos').innerText=total;
+
+ let ul=document.getElementById('siguientes'); ul.innerHTML='';
+ materias.forEach(m=>{
+   if(!document.getElementById(m.nombre).checked && m.pre.every(p=>document.getElementById(p)?.checked)){
+     let li=document.createElement('li'); li.innerText=m.nombre; ul.appendChild(li);
+   }
+ });
+ guardar();
+}
+
+const cont=document.getElementById('materias');
+materias.forEach(m=>{
+ let d=document.createElement('div'); d.className='materia';
+ d.innerHTML=`<label><input type='checkbox' id="${m.nombre}" onchange='render()'> ${m.nombre}</label><span class='badge'>${m.creditos} cr</span>`;
+ cont.appendChild(d);
+});
+
+const ch=document.getElementById('humanisticas');
+humanisticas.forEach((h,i)=>{
+ let d=document.createElement('div'); d.className='materia';
+ d.innerHTML=`<label><input type='checkbox' id='h${i}' onchange='guardar()'> ${h.nombre}</label><span class='badge'>${h.creditos} cr</span>`;
+ ch.appendChild(d);
+});
+
+cargar();
+</script>
+
+</body>
+</html>
